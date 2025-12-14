@@ -29,6 +29,7 @@ class EC2NodeClassConfig:
     security_groups_present: bool
     subnets_present: bool
     instance_profile: Optional[str]
+    role: Optional[str]
     raw_yaml: Dict[str, Any]
 
 

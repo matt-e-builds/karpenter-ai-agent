@@ -84,6 +84,7 @@ def extract_nodeclass_config(doc: dict) -> EC2NodeClassConfig:
     )
 
     instance_profile = spec.get("instanceProfile")
+    role = spec.get("role")
 
     return EC2NodeClassConfig(
         name=name,
@@ -92,6 +93,7 @@ def extract_nodeclass_config(doc: dict) -> EC2NodeClassConfig:
         security_groups_present=security_groups_present,
         subnets_present=subnets_present,
         instance_profile=instance_profile,
+        role=role,
         raw_yaml=doc,
     )
 

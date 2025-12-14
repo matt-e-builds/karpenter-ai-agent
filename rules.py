@@ -210,22 +210,24 @@ spec:
 
 def _check_nodeclass_instance_profile(nc: EC2NodeClassConfig) -> List[Issue]:
     """
-    High severity if an EC2NodeClass has no instanceProfile set.
+    High severity if an EC2NodeClass has neither instanceProfile nor role set.
     """
-    if nc.instance_profile:
+    if nc.instance_profile or nc.role:
         return []
 
     message = (
-        f"EC2NodeClass '{nc.name}' does not specify an instanceProfile."
+        f"EC2NodeClass '{nc.name}' does not specify an instanceProfile or IAM role."
     )
     recommendation = (
-        "Set an instanceProfile so nodes have the correct IAM role for EKS, "
-        "cloud provider integration, and workload permissions."
+        "Configure an instanceProfile or role so nodes receive the correct IAM permissions "
+        "for EKS, cloud provider integration, and workload access."
     )
 
-    patch = f"""# Example instanceProfile for EC2NodeClass '{nc.name}'
+    patch = f"""# Example IAM configuration for EC2NodeClass '{nc.name}'
 spec:
   instanceProfile: your-eks-node-instance-profile-name
+  # or use:
+  # role: your-eks-node-role-name
 """
 
     return [
