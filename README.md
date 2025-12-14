@@ -1,5 +1,7 @@
 # Karpenter AI Agent
 
+![CI](https://github.com/matt-e-builds/karpenter-ai-agent/actions/workflows/ci.yml/badge.svg)
+
 ## Overview
 Karpenter AI Agent is an open-source analysis and optimization tool for Kubernetes clusters that use Karpenter on AWS. It ingests Provisioner, NodePool, and EC2NodeClass manifests, applies deterministic static rules to detect correctness gaps and efficiency issues, and (optionally) produces an AI-generated natural-language summary strictly based on the rule results. The agent exposes a FastAPI web interface so platform teams can upload YAML, review findings, and download remediation snippets in one place.
 
@@ -12,6 +14,20 @@ All rule logic is deterministic and testable; AI output is an optional enhanceme
 - **Optional AI summary** – Groq-backed natural-language synopsis of the deterministic findings; never used for core logic.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
+
+## Screenshots
+
+### Upload form
+![Upload form](screenshots/upload.png)
+
+### Summary view
+![Summary view](screenshots/summary.png)
+
+### Issues and patches
+![Issues and patches](screenshots/issues-and-patches.png)
+
+### AI analysis
+![AI analysis](screenshots/ai-analysis.png)
 
 ## Installation
 ```bash
