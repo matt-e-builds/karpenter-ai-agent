@@ -4,3 +4,4 @@ pyyaml
 jinja2
 python-multipart
 requests
+pydantic

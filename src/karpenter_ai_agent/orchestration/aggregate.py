@@ -1,0 +1,1 @@
+"""Aggregation helpers (placeholder)."""
