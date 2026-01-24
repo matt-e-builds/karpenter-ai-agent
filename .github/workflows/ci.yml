@@ -44,10 +44,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install pip-audit
+      - name: Install security tools
         run: |
           python -m pip install --upgrade pip
-          pip install pip-audit
+          pip install pip-audit trufflehog
 
       - name: Run pip-audit
         run: pip-audit -r requirements.txt
+
+      - name: Run TruffleHog
+        run: trufflehog filesystem --no-update --fail .
