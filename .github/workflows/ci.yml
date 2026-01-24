@@ -52,10 +52,7 @@ jobs:
       - name: Run pip-audit
         run: pip-audit -r requirements.txt
 
-      - name: Install TruffleHog (v3)
-        run: |
-          curl -L https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_linux_amd64 -o trufflehog
-          chmod +x trufflehog
-
-      - name: Run TruffleHog
-        run: ./trufflehog filesystem --no-update --fail .
+      - name: Secret scan (TruffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown --fail
