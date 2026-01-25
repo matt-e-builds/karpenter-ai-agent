@@ -5,7 +5,7 @@
 ## Overview
 Karpenter AI Agent is an open-source analysis and optimization tool for Kubernetes clusters that use Karpenter on AWS. It ingests Provisioner, NodePool, and EC2NodeClass manifests, applies deterministic static rules to detect correctness gaps and efficiency issues, and (optionally) produces an AI-generated natural-language summary strictly based on the rule results. The agent exposes a FastAPI web interface so platform teams can upload YAML, review findings, and download remediation snippets in one place.
 
-All rule logic is deterministic and testable; AI output is an optional enhancement. The project is released under the MIT License.
+All rule logic is deterministic and testable; the analysis flow is parse → analyze → aggregate → report, and AI output is an optional enhancement. The project is released under the MIT License.
 
 ## Features
 - **Robust YAML parsing** – Handles multi-document uploads, Provisioners, NodePools, and EC2NodeClasses with defensive parsing for edge cases.
@@ -14,6 +14,14 @@ All rule logic is deterministic and testable; AI output is an optional enhanceme
 - **Optional AI summary** – Groq-backed natural-language synopsis of the deterministic findings; never used for core logic.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
+## Architecture
+- Multi-agent design: ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent, and CoordinatorAgent.
+- Typed Pydantic contracts for all agent inputs/outputs and normalized config.
+- LangGraph orchestration with a deterministic graph.
+- Conditional short-circuit when parsing fails (no downstream analysis).
+- MCP-style local tools for deterministic, read-only helpers.
+- Optional AI summary is generated from rule outputs only; it never affects findings.
+
 
 ## Screenshots
 
@@ -53,16 +61,23 @@ Then open http://127.0.0.1:5000 and upload one or more Karpenter YAML files.
 ## Project Structure
 ```text
 karpenter-ai-agent/
-├── main.py             # FastAPI entrypoint
-├── parser.py           # YAML parsing helpers
-├── rules.py            # Deterministic rule engine + scoring
-├── models.py           # Dataclasses for configs and issues
-├── llm_client.py       # Optional Groq integration for summaries
-├── templates/          # Jinja2 templates for form/results
-├── static/             # Static assets (CSS/JS)
+├── main.py                       # FastAPI entrypoint (routes + UI)
+├── src/karpenter_ai_agent/
+│   ├── agents/                   # Parser/Cost/Reliability/Security/Coordinator
+│   ├── orchestration/            # LangGraph flow + aggregation
+│   ├── mcp/                      # Local deterministic tool runtime
+│   └── models/                   # Pydantic contracts
+├── parser.py                     # Legacy parser (used by agents)
+├── rules.py                      # Legacy rules + scoring (used by agents)
+├── models.py                     # Legacy dataclasses (used by UI/compat)
+├── llm_client.py                 # Optional Groq integration
+├── templates/                    # Jinja2 templates for form/results
+├── static/                       # Static assets (CSS/JS)
 ├── tests/
-│   ├── fixtures/       # Sample Provisioner / NodePool / NodeClass YAML
-│   └── test_rules.py   # Rule + summary tests
+│   ├── fixtures/                 # Sample Karpenter YAML
+│   ├── test_rules.py             # Legacy rule tests
+│   ├── test_agents_*.py          # Agent unit tests
+│   └── test_orchestration_flow.py
 ├── requirements.txt
 ├── pyproject.toml
 └── README.md
