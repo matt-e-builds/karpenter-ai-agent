@@ -1,0 +1,22 @@
+from pathlib import Path
+
+from karpenter_ai_agent.models import AnalysisInput
+from karpenter_ai_agent.orchestration.graph import run_analysis_graph
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def test_orchestration_flow_valid_yaml():
+    yaml_text = (FIXTURES / "basic-karpenter.yaml").read_text()
+    report = run_analysis_graph(AnalysisInput(yaml_text=yaml_text, region="us-east-1"))
+
+    assert report.health_score >= 0
+    assert report.issues_by_severity
+    assert not report.parse_errors
+
+
+def test_orchestration_flow_invalid_yaml():
+    bad_yaml = "kind: Provisioner\nmetadata: ["  # invalid YAML
+    report = run_analysis_graph(AnalysisInput(yaml_text=bad_yaml))
+
+    assert report.parse_errors
