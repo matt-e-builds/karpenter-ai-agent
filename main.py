@@ -45,6 +45,7 @@ async def analyze(
     all_provisioners: List[ProvisionerConfig] = []
     all_nodeclasses: List[EC2NodeClassConfig] = []
     parse_errors: List[str] = []
+    yaml_chunks: List[str] = []
 
     # Parse uploaded YAML files
     for uploaded_file in files:
