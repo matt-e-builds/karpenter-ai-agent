@@ -5,73 +5,66 @@
 > There are **no SaaS, billing, or premium features** planned as part of this project.
 
 ---
+## Current State
 
-## Roadmap Phases
+- Multi-agent structure (ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent, CoordinatorAgent)
+- LangGraph orchestration with deterministic flow and parse short-circuit
+- MCP-style local tooling layer for deterministic helpers
+- Agent unit tests + orchestration integration tests
 
-### Step 1 — Full EC2NodeClass rule coverage
+---
+
+## Completed
+
+- Multi-agent architecture + Pydantic contracts
+- LangGraph orchestration + CoordinatorAgent
+- MCP-style deterministic tooling layer
+- Deterministic health scoring (0–100) in UI
+- Agent unit tests + orchestration flow tests
+
+---
+
+## Roadmap Phases (Next)
+
+### Step 1 — Expand EC2NodeClass rule coverage
 
 - Detect missing AMI selectors
 - Detect incomplete subnet selector configuration
 - Detect incomplete security group selector configuration
-- Validate `instanceProfile` presence and basic correctness
+- Validate IAM role/instanceProfile correctness
 - Cross-validate NodePool ↔ EC2NodeClass references
-- Generate patch suggestions for all EC2NodeClass findings
-- Surface EC2NodeClass details in the UI and link them to related NodePools
+- Generate patch suggestions for NodeClass findings
 
 ---
 
-### Step 2 — Deterministic scoring system (0–100)
+### Step 2 — Patch bundling and export
 
-- Derive a single **Karpenter Health Score** from rule results
-- Weight high-severity issues more heavily than medium/low
-- Show:
-  - Per-NodePool score
-  - Overall cluster score
-- Color-coded severity badges (red / yellow / green)
-- Short human-readable risk labels (e.g., *High cost risk*, *Low efficiency risk*)
+- Generate combined patch bundles grouped by NodePool
+- Allow include/exclude of Spot, consolidation, TTL, Graviton fixes
+- Export HTML and PDF reports for sharing
 
 ---
 
-### Step 3 — Provisioner / NodePool comparison dashboard
+### Step 3 — UI/UX improvements
 
-- Table view comparing NodePools on:
-  - Spot usage
-  - Graviton usage
-  - Consolidation status
-  - TTL configuration
-  - Instance family diversity
-- Sorting and filtering by:
-  - Severity
-  - Name
-  - Score
-- Direct links to suggested YAML patches per NodePool
+- Filtering and sorting by severity, name, and score
+- Side-by-side comparison of two configurations
+- Clear visual explanation of why each rule fired
 
 ---
 
-### Step 4 — Exportable analysis reports
+### Step 4 — Regression fixtures and validation pack
 
-- Export analysis as:
-  - Standalone HTML report
-  - Printable PDF report
-- Reports include:
-  - Summary metrics
-  - Detailed rule findings
-  - AI-generated explanations
-  - (Optional) truncated YAML patch examples
-- Reports are static and safe to share with teams
+- Add benchmark fixtures from public Karpenter examples
+- Build a regression pack to prevent rule drift
+- Expand integration tests for edge-case YAML
 
 ---
 
-### Step 5 — Safe auto-fix patch bundling
+### Step 5 — Optional integrations (OSS)
 
-- Generate a combined patch bundle grouped by NodePool
-- Allow users to include/exclude:
-  - Spot recommendations
-  - Consolidation changes
-  - TTL changes
-  - Graviton recommendations
-- Output a single `karpenter-fixes.yaml`
-- Include clear safety notes and manual review guidance
+- Document optional Prometheus/Cost Explorer inputs (out of scope for core logic)
+- Provide structured JSON output for automation
 
 ---
 
@@ -99,35 +92,12 @@
 
 ---
 
-### UI / UX improvements
-
-- Mode selector: **Cost-Focused** vs **Full Advisor**
-- Category-level scores (Cost, Efficiency, Reliability)
-- Side-by-side comparison of two configurations
-- “Before vs After” analysis when applying suggested fixes
-- Clear visual explanation of why each rule fired
-
----
-
 ### Tooling & integrations
 
 - GitHub Actions integration for validating Karpenter YAML in PRs
 - CLI interface for local and CI usage
-- Structured JSON output for automation and integrations
 - Plugin-style rule registration for easier extensibility
 - Version-aware validation for multiple Karpenter releases
-
----
-
-### Architecture & maintainability
-
-- Rule engine modularization
-- Improved test coverage for edge-case configurations
-- Caching of AI explanations (optional, local only)
-- Clear separation between:
-  - Deterministic rules
-  - AI explanation layer
-- Future support for additional platforms (long-term, experimental)
 
 ---
 
