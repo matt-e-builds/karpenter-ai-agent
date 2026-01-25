@@ -100,5 +100,7 @@ def build_graph() -> StateGraph:
 
 def run_analysis_graph(analysis_input: AnalysisInput) -> AnalysisReport:
     graph = build_graph()
-    result = graph.invoke(GraphState(input=analysis_input))
-    return result.report
+    runnable = graph.compile()
+    result = runnable.invoke(GraphState(input=analysis_input))
+    report = result["report"]
+    return report
