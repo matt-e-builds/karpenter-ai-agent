@@ -2,8 +2,7 @@
 
 > This roadmap outlines planned improvements for the **open-source Karpenter AI Agent**.  
 > All items below focus on deterministic analysis, explainability, and safe automation.  
-> There are **no SaaS, billing, or premium features** planned as part of this project.
-
+> 
 ---
 ## Current State
 
