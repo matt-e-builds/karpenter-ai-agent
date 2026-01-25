@@ -17,7 +17,7 @@
 
 - Multi-agent architecture + Pydantic contracts
 - LangGraph orchestration + CoordinatorAgent
-- MCP-style deterministic tooling layer
+- Internal MCP-compatible tool runtime (read-only, deterministic)
 - Deterministic health scoring (0–100) in UI
 - Agent unit tests + orchestration flow tests
 
