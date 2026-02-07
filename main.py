@@ -19,6 +19,7 @@ from llm_client import generate_report
 from karpenter_ai_agent.agents import CoordinatorAgent, ParserAgent
 from karpenter_ai_agent.agents._adapters import to_legacy_provisioner, to_legacy_nodeclass
 from karpenter_ai_agent.models import AnalysisInput
+from karpenter_ai_agent.rag.explain import attach_issue_explanations
 
 app = FastAPI(title="Karpenter Optimization Agent")
 
@@ -112,9 +113,12 @@ async def analyze(
             resource_kind=i.resource_kind,
             resource_name=i.resource_name,
             patch_snippet=i.patch_snippet,
+            field=(i.metadata.get("field") if isinstance(i.metadata, dict) else None),
         )
         for i in report.issues
     ]
+
+    attach_issue_explanations(issues)
 
     # Store for download endpoint
     global LAST_ISSUES

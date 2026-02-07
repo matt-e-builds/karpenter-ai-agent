@@ -49,6 +49,8 @@
 - Filtering and sorting by severity, name, and score
 - Side-by-side comparison of two configurations
 - Clear visual explanation of why each rule fired
+- Show grounded citations/snippets when explanations use RAG
+- Clear indicator when AI explanations are disabled vs enabled
 
 ---
 
@@ -57,6 +59,8 @@
 - Add benchmark fixtures from public Karpenter examples
 - Build a regression pack to prevent rule drift
 - Expand integration tests for edge-case YAML
+- Curated docs pack fixture for RAG regression (no network)
+- Deterministic tests to verify explanations are grounded and do not change findings
 
 ---
 
@@ -64,6 +68,7 @@
 
 - Document optional Prometheus/Cost Explorer inputs (out of scope for core logic)
 - Provide structured JSON output for automation
+- Explanation-only RAG (local corpus) and evaluator are optional integrations; core analysis remains deterministic.
 
 ---
 
@@ -91,6 +96,27 @@
 
 ---
 
+## Agentic Explainability & Evaluation (Optional, OSS)
+
+- Explanation-only RAG layer:
+- Curated Karpenter docs corpus (local)
+- Local retrieval for grounding explanations
+- Must not affect rule execution/scoring
+- Evaluator/Critic (LLM-optional):
+- Checks explanation grounding, completeness, and clarity
+- Cannot create/modify/suppress findings
+- Bounded reflection loop:
+- At most 1 retry if evaluator flags issues
+- Hard limits to prevent loops
+- Decision hierarchy invariant:
+- Rules → decision trees → single LLM calls → agentic flows (last resort)
+- Document + test as invariant
+- Optional “DLQ-style” exception diagnostics:
+- Only for malformed/ambiguous configs
+- Produces diagnostics, not decisions
+
+---
+
 ### Tooling & integrations
 
 - GitHub Actions integration for validating Karpenter YAML in PRs
@@ -107,7 +133,7 @@
 | v0.4 | NodePool rules, basic UI, AI explanations, patch suggestions |
 | v0.5 | EC2NodeClass validation and UI surface |
 | v0.6 | Scoring system and comparison dashboard |
-| v0.7 | Report export and bundled patch generation |
+| v0.7 | Report export and bundled patch generation; RAG-grounded explanations + evaluator (LLM-optional) |
 | v0.8 | Reliability and operational best-practice rules |
 | v1.0 | Stable OSS release with documented extension points |
 

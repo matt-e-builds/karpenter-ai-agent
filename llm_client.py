@@ -4,7 +4,9 @@ import json
 import requests
 from dataclasses import asdict
 from typing import Optional, List
-from models import Issue
+from models import Issue, IssueExplanation
+from karpenter_ai_agent.rag.models import RetrievedChunk
+from karpenter_ai_agent.rag.prompts import EXPLANATION_SYSTEM_PROMPT, build_issue_prompt
 
 SYSTEM_PROMPT = """You are an expert AWS cost optimization consultant specializing in Kubernetes and Karpenter.
 
@@ -99,6 +101,40 @@ def _sanitize_ai_text(text: str) -> str:
     return cleaned.strip()
 
 
+def _parse_issue_explanation(text: str) -> IssueExplanation:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    section = None
+    why_lines: List[str] = []
+    change_lines: List[str] = []
+
+    for line in lines:
+        upper = line.upper()
+        if upper.startswith("WHY:"):
+            section = "why"
+            content = line[4:].strip()
+            if content:
+                why_lines.append(content)
+            continue
+        if upper.startswith("CHANGE:"):
+            section = "change"
+            continue
+        if upper.startswith("DOCS:"):
+            section = "docs"
+            continue
+
+        if section == "why":
+            why_lines.append(line)
+        elif section == "change" and line.startswith("-"):
+            change_lines.append(line[1:].strip())
+
+    why_matters = " ".join(why_lines).strip() if why_lines else None
+    return IssueExplanation(why_matters=why_matters, what_to_change=change_lines)
+
+
+def is_llm_enabled() -> bool:
+    return bool(os.environ.get("GROQ_API_KEY"))
+
+
 def call_free_model(region: str, summary: dict, issues: list) -> str:
     """
     Call the Groq API with Llama 3.3 model for AI analysis.
@@ -158,6 +194,54 @@ def call_free_model(region: str, summary: dict, issues: list) -> str:
         return f"Request failed: {str(e)}"
     except (KeyError, json.JSONDecodeError, IndexError) as e:
         return f"Response parsing failed: {str(e)}"
+
+
+def generate_issue_explanation(
+    issue: Issue,
+    chunks: List[RetrievedChunk],
+) -> Optional[IssueExplanation]:
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        return None
+
+    issue_payload = {
+        "severity": issue.severity,
+        "category": issue.category,
+        "message": issue.message,
+        "recommendation": issue.recommendation,
+        "resource_kind": issue.resource_kind,
+        "resource_name": issue.resource_name,
+        "field": issue.field,
+    }
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": EXPLANATION_SYSTEM_PROMPT},
+            {"role": "user", "content": build_issue_prompt(issue_payload, chunks)},
+        ],
+        "max_tokens": 300,
+        "temperature": 0.2,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=45)
+        if response.status_code != 200:
+            return None
+        raw = response.json()["choices"][0]["message"]["content"]
+        cleaned = _sanitize_ai_text(raw)
+        if not cleaned:
+            return None
+        return _parse_issue_explanation(cleaned)
+    except requests.exceptions.RequestException:
+        return None
+    except (KeyError, json.JSONDecodeError, IndexError):
+        return None
 
 
 def generate_report(region: str, summary: dict, issues: List[Issue]) -> str:

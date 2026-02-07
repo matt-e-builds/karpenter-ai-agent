@@ -10,8 +10,12 @@ from karpenter_ai_agent.mcp.schemas import (
     EstimateCostSignalsOutput,
     ExplainRecommendationInput,
     ExplainRecommendationOutput,
+    RetrieveKarpenterDocsInput,
+    RetrieveKarpenterDocsOutput,
+    RetrievedDocChunk,
 )
 from parser import parse_provisioner_yaml
+from karpenter_ai_agent.rag.retrieve import retrieve
 
 
 def validate_yaml_schema(
@@ -50,3 +54,20 @@ def explain_recommendation(
         "Review the recommendation and apply only after validation."
     )
     return ExplainRecommendationOutput(explanation=explanation)
+
+
+def retrieve_karpenter_docs(
+    payload: RetrieveKarpenterDocsInput,
+) -> RetrieveKarpenterDocsOutput:
+    """Retrieve curated Karpenter doc snippets for a query."""
+    result = retrieve(payload.query, top_k=payload.top_k)
+    chunks = [
+        RetrievedDocChunk(
+            title=chunk.title,
+            source_url=chunk.source_url,
+            text=chunk.text,
+            score=chunk.score,
+        )
+        for chunk in result.chunks
+    ]
+    return RetrieveKarpenterDocsOutput(chunks=chunks)
