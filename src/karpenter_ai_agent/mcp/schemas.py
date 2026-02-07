@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from pydantic import BaseModel, Field
 
 from karpenter_ai_agent.models import CanonicalConfig, ParseError
@@ -33,3 +33,19 @@ class ExplainRecommendationInput(BaseModel):
 
 class ExplainRecommendationOutput(BaseModel):
     explanation: str
+
+
+class RetrieveKarpenterDocsInput(BaseModel):
+    query: str
+    top_k: int = Field(default=3, ge=1, le=10)
+
+
+class RetrievedDocChunk(BaseModel):
+    title: str
+    source_url: str
+    text: str
+    score: float
+
+
+class RetrieveKarpenterDocsOutput(BaseModel):
+    chunks: List[RetrievedDocChunk] = Field(default_factory=list)

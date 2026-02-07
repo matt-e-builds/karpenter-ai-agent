@@ -3,6 +3,20 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
+class IssueDoc:
+    title: str
+    source_url: str
+    score: Optional[float] = None
+
+
+@dataclass
+class IssueExplanation:
+    why_matters: Optional[str] = None
+    what_to_change: List[str] = field(default_factory=list)
+    docs: List[IssueDoc] = field(default_factory=list)
+
+
+@dataclass
 class ProvisionerConfig:
     """
     Represents a Karpenter Provisioner or NodePool.
@@ -51,6 +65,9 @@ class Issue:
 
     # Optional YAML patch snippet (not populated in this rules version)
     patch_snippet: Optional[str] = None
+
+    # Optional explanation fields (RAG-backed, explanation-only)
+    explanation: Optional[IssueExplanation] = None
 
 
 @dataclass

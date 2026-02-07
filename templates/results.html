@@ -176,6 +176,43 @@
             padding: 0.5rem;
             border-radius: 4px;
         }
+        .issue-explanation {
+            margin-top: 0.8rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+        .issue-explanation summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 0.4rem;
+        }
+        .issue-explanation p {
+            color: #cbd5f5;
+            font-size: 0.9rem;
+            margin: 0.3rem 0 0.5rem 0;
+        }
+        .issue-change-title,
+        .issue-docs-title {
+            font-weight: 600;
+            color: #e5e7eb;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .issue-change ul,
+        .issue-docs ul {
+            margin: 0 0 0.9rem 1.1rem;
+            padding: 0;
+            color: #cbd5f5;
+            font-size: 0.9rem;
+        }
+        .issue-docs a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        .issue-docs a:hover {
+            text-decoration: underline;
+        }
 
         /* Patch block */
         .issue-patch {
@@ -283,6 +320,11 @@
             color: #9ca3af;
             font-size: 0.9rem;
             margin-bottom: 0.75rem;
+        }
+        .ai-grounding {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 0.6rem;
         }
 
         .ai-output {
@@ -556,6 +598,38 @@
                     <div class="issue-message">{{ issue.message }}</div>
                     <div class="issue-recommendation">{{ issue.recommendation }}</div>
 
+                    {% if issue.explanation and issue.explanation.why_matters %}
+                    <details class="issue-explanation">
+                        <summary>Why this matters</summary>
+                        <p>{{ issue.explanation.why_matters }}</p>
+                        {% if issue.explanation.what_to_change %}
+                        <div class="issue-change">
+                            <div class="issue-change-title">What to change</div>
+                            <ul>
+                                {% for item in issue.explanation.what_to_change %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </details>
+                    {% endif %}
+
+                    {% if issue.explanation and issue.explanation.docs %}
+                    <div class="issue-docs">
+                        <div class="issue-docs-title">Relevant docs</div>
+                        <ul>
+                            {% for doc in issue.explanation.docs %}
+                            <li>
+                                <a href="{{ doc.source_url }}" target="_blank" rel="noopener">
+                                    {{ doc.title }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
                     {% if issue.patch_snippet %}
                     <div class="issue-patch">
                         <div class="issue-patch-header">
@@ -582,6 +656,7 @@
             <p class="ai-intro">
                 Below is an AI-generated summary of your Karpenter configuration and optimization recommendations:
             </p>
+            <p class="ai-grounding">Explanations are grounded with retrieved Karpenter docs links.</p>
             <div class="ai-output">{{ ai_analysis|safe }}</div>
         </div>
 

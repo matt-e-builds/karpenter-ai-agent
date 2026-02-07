@@ -12,6 +12,7 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 - **Deterministic rule engine** – Checks Spot adoption, consolidation configuration, Graviton coverage, `ttlSecondsAfterEmpty`, and EC2NodeClass IAM/subnet/security-group settings.
 - **Actionable issue output** – Severity-tagged findings with human-readable recommendations, health score summary, and ready-to-apply YAML patch snippets (copy-to-clipboard in the UI).
 - **Optional AI summary** – Groq-backed natural-language synopsis of the deterministic findings; never used for core logic.
+- **Grounded explanations (RAG v1)** – Curated Karpenter docs excerpts are retrieved locally to back per-issue explanations and links. No scraping, no bulk doc copying.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
 ## Architecture
@@ -61,11 +62,13 @@ Then open http://127.0.0.1:5000 and upload one or more Karpenter YAML files.
 ## Project Structure
 ```text
 karpenter-ai-agent/
+├── docs/knowledge/karpenter/     # Curated Karpenter knowledge pack (RAG v1)
 ├── main.py                       # FastAPI entrypoint (routes + UI)
 ├── src/karpenter_ai_agent/
 │   ├── agents/                   # Parser/Cost/Reliability/Security/Coordinator
 │   ├── orchestration/            # LangGraph flow + aggregation
 │   ├── mcp/                      # Local deterministic tool runtime
+│   ├── rag/                      # Local retrieval and explanation helpers
 │   └── models/                   # Pydantic contracts
 ├── parser.py                     # Legacy parser (used by agents)
 ├── rules.py                      # Legacy rules + scoring (used by agents)
