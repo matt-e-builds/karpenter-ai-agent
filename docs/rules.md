@@ -12,6 +12,10 @@ explanations.
 - security:invalid-iam-settings (high)
 - security:ambiguous-iam-settings (medium)
 
+## NodePool ↔ EC2NodeClass rules (SecurityAgent)
+- security:missing-nodeclass (high)
+- security:missing-nodeclass-ref (medium)
+
 ## Legacy rule IDs
 Cost and reliability rules are generated from the issue message using this
 pattern: <agent>:<message-slug>. Examples: cost:missing-spot, reliability:ttl

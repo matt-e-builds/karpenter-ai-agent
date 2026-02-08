@@ -42,3 +42,11 @@ def test_orchestration_flow_explain_evaluate_does_not_change_findings():
 
     assert base_fingerprints == eval_fingerprints
     assert base_report.issues_by_severity == eval_report.issues_by_severity
+
+
+def test_orchestration_flow_flags_missing_nodeclass():
+    yaml_text = (FIXTURES / "nodepool-nodeclass.yaml").read_text()
+    report = run_analysis_graph(AnalysisInput(yaml_text=yaml_text, region="us-east-1"))
+
+    rule_ids = {issue.rule_id for issue in report.issues}
+    assert "security:missing-nodeclass" in rule_ids
