@@ -15,7 +15,12 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 - **Grounded explanations (RAG v1)** – Curated Karpenter docs excerpts are retrieved locally to back per-issue explanations and links. No scraping, no bulk doc copying.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
+
 ## Architecture
+![Architecture](docs/architecture.svg)
+
+Deterministic LangGraph orchestration over typed Pydantic contracts; LLM usage is strictly explain-only.
+## Design Principles
 - Multi-agent design: ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent, and CoordinatorAgent.
 - Typed Pydantic contracts for all agent inputs/outputs and normalized config.
 - LangGraph orchestration with a deterministic graph.
