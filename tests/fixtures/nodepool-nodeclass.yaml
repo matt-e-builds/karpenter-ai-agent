@@ -35,4 +35,3 @@ spec:
   securityGroupSelectorTerms:
     - tags:
         Name: "eks-nodes"
-  instanceProfile: "node-profile"

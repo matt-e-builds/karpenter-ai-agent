@@ -93,6 +93,7 @@ class AnalysisReport(BaseModel):
     parse_errors: List[ParseError] = Field(default_factory=list)
     ai_summary: Optional[str] = None
     evaluation_notes: List[str] = Field(default_factory=list)
+    patch_suggestions: List["PatchSuggestion"] = Field(default_factory=list)
     raw: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -100,3 +101,6 @@ class ParserOutput(BaseModel):
     config: Optional[CanonicalConfig] = None
     parse_errors: List[ParseError] = Field(default_factory=list)
     normalized_metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+from karpenter_ai_agent.models.patches import PatchSuggestion  # noqa: E402

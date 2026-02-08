@@ -213,6 +213,49 @@
         .issue-docs a:hover {
             text-decoration: underline;
         }
+        .bundle-controls {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.18);
+        }
+        .bundle-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            color: #cbd5f5;
+        }
+        .bundle-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .bundle-actions .back-link {
+            background: transparent;
+        }
+        .bundle-actions .back-link,
+        .bundle-actions button.back-link {
+            min-width: 260px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        .bundle-actions select {
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+        }
+        .bundle-links {
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
 
         /* Patch block */
         .issue-patch {
@@ -585,7 +628,19 @@
         <div class="card">
             <h2 class="card-title">Detected Issues ({{ issues|length }})</h2>
             <div style="margin-bottom: 1rem;">
-                <a href="/download-patches" class="back-link">Download All YAML Patches</a>
+                <div class="bundle-controls">
+                    <div class="bundle-filters">
+                        <label><input type="checkbox" class="bundle-filter" value="spot" checked> Spot</label>
+                        <label><input type="checkbox" class="bundle-filter" value="consolidation" checked> Consolidation</label>
+                        <label><input type="checkbox" class="bundle-filter" value="ttl" checked> TTL</label>
+                        <label><input type="checkbox" class="bundle-filter" value="graviton" checked> Graviton</label>
+                        <label><input type="checkbox" class="bundle-filter" value="nodeclass"> NodeClass</label>
+                    </div>
+                    <div class="bundle-actions">
+                        <button type="button" class="back-link" id="download-bundle">Download Patch Bundle</button>
+                        <a href="/download/report.html" class="back-link">Download HTML Report</a>
+                    </div>
+                </div>
             </div>
             {% if issues %}
                 {% for issue in issues %}
@@ -719,6 +774,22 @@
             document.body.removeChild(textarea);
         }
     });
+
+    function buildBundleQuery() {
+        const selected = Array.from(document.querySelectorAll('.bundle-filter'))
+            .filter(cb => cb.checked)
+            .map(cb => `${encodeURIComponent(cb.value)}=1`);
+        selected.push('selected=1');
+        return `?${selected.join('&')}`;
+    }
+
+    const bundleBtn = document.getElementById('download-bundle');
+    if (bundleBtn) {
+        bundleBtn.addEventListener('click', function () {
+            window.location.href = `/download/patch-bundle.yaml${buildBundleQuery()}`;
+        });
+    }
+
     </script>
 </body>
 </html>
