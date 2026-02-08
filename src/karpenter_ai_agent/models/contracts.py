@@ -17,6 +17,19 @@ class Issue(BaseModel):
     resource_kind: Optional[str] = None
     patch_snippet: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    explanation: Optional["IssueExplanation"] = None
+
+
+class ExplanationDoc(BaseModel):
+    title: str
+    source_url: str
+    score: Optional[float] = None
+
+
+class IssueExplanation(BaseModel):
+    why_matters: Optional[str] = None
+    what_to_change: List[str] = Field(default_factory=list)
+    docs: List[ExplanationDoc] = Field(default_factory=list)
 
 
 class ParseError(BaseModel):
@@ -66,6 +79,11 @@ class AgentResult(BaseModel):
     signals: Dict[str, Any] = Field(default_factory=dict)
 
 
+class EvaluationResult(BaseModel):
+    notes: List[str] = Field(default_factory=list)
+    retries: int = 0
+
+
 class AnalysisReport(BaseModel):
     region: Optional[str] = None
     health_score: int
@@ -74,6 +92,7 @@ class AnalysisReport(BaseModel):
     optimizer_flags: Dict[str, Any]
     parse_errors: List[ParseError] = Field(default_factory=list)
     ai_summary: Optional[str] = None
+    evaluation_notes: List[str] = Field(default_factory=list)
     raw: Dict[str, Any] = Field(default_factory=dict)
 
 

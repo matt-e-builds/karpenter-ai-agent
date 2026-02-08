@@ -53,6 +53,11 @@ export GROQ_API_KEY="your_groq_api_key_here"
 ```
 If the variable is unset, the application still runs; AI summaries are simply disabled.
 
+## Optional RAG-based explanations
+The UI can show explanation-only context grounded in a local, curated docs corpus.
+This retrieval layer never changes findings or severities; it only adds links and
+short narrative context when enabled.
+
 ## Running the App
 ```bash
 python main.py
@@ -62,6 +67,9 @@ Then open http://127.0.0.1:5000 and upload one or more Karpenter YAML files.
 ## Project Structure
 ```text
 karpenter-ai-agent/
+├── docs/knowledge/              # Curated docs corpus for RAG
+├── docs/rag.md                  # RAG scope and refresh process
+├── docs/rules.md                # Rule IDs, severities, and patch behavior
 ├── docs/knowledge/karpenter/     # Curated Karpenter knowledge pack (RAG v1)
 ├── main.py                       # FastAPI entrypoint (routes + UI)
 ├── src/karpenter_ai_agent/

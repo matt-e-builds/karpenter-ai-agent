@@ -20,6 +20,8 @@
 - Internal MCP-compatible tool runtime (read-only, deterministic)
 - Deterministic health scoring (0–100) in UI
 - Agent unit tests + orchestration flow tests
+- EC2NodeClass checks: AMI selectors, subnet/security group selectors, IAM role/instanceProfile validation
+- Patch suggestions for EC2NodeClass findings
 
 ---
 
@@ -27,12 +29,7 @@
 
 ### Step 1 — Expand EC2NodeClass rule coverage
 
-- Detect missing AMI selectors
-- Detect incomplete subnet selector configuration
-- Detect incomplete security group selector configuration
-- Validate IAM role/instanceProfile correctness
 - Cross-validate NodePool ↔ EC2NodeClass references
-- Generate patch suggestions for NodeClass findings
 
 ---
 
@@ -102,9 +99,11 @@
 - Curated Karpenter docs corpus (local)
 - Local retrieval for grounding explanations
 - Must not affect rule execution/scoring
+- RAG corpus management (curation + refresh process)
 - Evaluator/Critic (LLM-optional):
 - Checks explanation grounding, completeness, and clarity
 - Cannot create/modify/suppress findings
+- EvaluatorAgent integration in the graph (optional)
 - Bounded reflection loop:
 - At most 1 retry if evaluator flags issues
 - Hard limits to prevent loops

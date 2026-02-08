@@ -8,9 +8,7 @@ import re
 
 from karpenter_ai_agent.rag.models import Chunk
 
-DEFAULT_KNOWLEDGE_PATH = (
-    Path(__file__).resolve().parents[3] / "docs" / "knowledge" / "karpenter"
-)
+DEFAULT_KNOWLEDGE_PATH = Path(__file__).resolve().parents[3] / "docs" / "knowledge"
 
 _STOPWORDS = {
     "the",
@@ -109,14 +107,14 @@ def _content_without_metadata(lines: List[str]) -> str:
 
 def _load_chunks(path: Path, max_len: int) -> List[Chunk]:
     chunks: List[Chunk] = []
-    for file_path in sorted(path.glob("*.md")):
+    for file_path in sorted(path.glob("**/*.md")):
         lines = file_path.read_text(encoding="utf-8").splitlines()
         title, source_url = _extract_doc_metadata(lines)
         content = _content_without_metadata(lines)
         if not content:
             continue
         blocks = _split_blocks(content)
-        doc_id = file_path.stem
+        doc_id = str(file_path.relative_to(path)).replace("/", "-").replace("\\", "-")
         idx = 0
         for block in blocks:
             for part in _split_long_block(block, max_len):

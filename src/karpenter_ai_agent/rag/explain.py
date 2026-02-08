@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from karpenter_ai_agent.rag.retrieve import retrieve_for_issue
 from karpenter_ai_agent.rag.render import render_citations
+from karpenter_ai_agent.models import Issue as ContractIssue, ExplanationDoc, IssueExplanation as ContractExplanation
 from models import Issue, IssueDoc, IssueExplanation
 from llm_client import generate_issue_explanation, is_llm_enabled
 
@@ -41,6 +42,55 @@ def attach_issue_explanations(
                 explanation = IssueExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
         else:
             explanation = IssueExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
+
+        explanation.docs = docs
+        issue.explanation = explanation
+
+
+def attach_contract_explanations(
+    issues: List[ContractIssue],
+    *,
+    top_k: int = 3,
+    llm_available: Optional[bool] = None,
+) -> None:
+    if llm_available is None:
+        llm_available = is_llm_enabled()
+
+    for issue in issues:
+        retrieval = retrieve_for_issue(issue, top_k=top_k)
+        citations = render_citations(retrieval.chunks)
+        if not citations:
+            continue
+        docs = [
+            ExplanationDoc(
+                title=citation["title"],
+                source_url=citation["source_url"],
+                score=citation.get("score"),
+            )
+            for citation in citations
+        ]
+
+        if llm_available:
+            legacy_issue = Issue(
+                severity=issue.severity,
+                category=issue.category,
+                message=issue.message,
+                recommendation=issue.recommendation,
+                provisioner_name=issue.resource_name,
+                resource_kind=issue.resource_kind,
+                resource_name=issue.resource_name,
+                patch_snippet=issue.patch_snippet,
+            )
+            legacy_explanation = generate_issue_explanation(legacy_issue, retrieval.chunks)
+            if legacy_explanation is None:
+                explanation = ContractExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
+            else:
+                explanation = ContractExplanation(
+                    why_matters=legacy_explanation.why_matters,
+                    what_to_change=list(legacy_explanation.what_to_change),
+                )
+        else:
+            explanation = ContractExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
 
         explanation.docs = docs
         issue.explanation = explanation
