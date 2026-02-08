@@ -1,0 +1,58 @@
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: missing-ami
+spec:
+  subnetSelectorTerms:
+    - tags:
+        Name: "private-a"
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "eks-nodes"
+  instanceProfile: "node-profile"
+---
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: broad-ami
+spec:
+  amiSelectorTerms:
+    - {}
+  subnetSelectorTerms:
+    - tags:
+        Name: "private-b"
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "eks-nodes"
+  instanceProfile: "node-profile"
+---
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: invalid-iam
+spec:
+  amiSelectorTerms:
+    - id: "ami-0123456789abcdef0"
+  subnetSelectorTerms:
+    - tags:
+        Name: "private-c"
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "eks-nodes"
+  instanceProfile: "node-profile"
+  role: "role-name"
+---
+apiVersion: karpenter.k8s.aws/v1beta1
+kind: EC2NodeClass
+metadata:
+  name: invalid-iam-type
+spec:
+  amiSelectorTerms:
+    - id: "ami-0123456789abcdef0"
+  subnetSelectorTerms:
+    - tags:
+        Name: "private-d"
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "eks-nodes"
+  instanceProfile: "   "

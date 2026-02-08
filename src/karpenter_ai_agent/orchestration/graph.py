@@ -6,8 +6,13 @@ from pydantic import BaseModel
 from langgraph.graph import StateGraph, END
 
 from karpenter_ai_agent.models import AnalysisInput, ParserOutput, AgentResult, AnalysisReport
-from karpenter_ai_agent.agents import ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent
+from karpenter_ai_agent.agents.parser_agent import ParserAgent
+from karpenter_ai_agent.agents.cost_agent import CostAgent
+from karpenter_ai_agent.agents.reliability_agent import ReliabilityAgent
+from karpenter_ai_agent.agents.security_agent import SecurityAgent
+from karpenter_ai_agent.agents.evaluator_agent import EvaluatorAgent
 from karpenter_ai_agent.orchestration.aggregate import aggregate_results
+from karpenter_ai_agent.rag.explain import attach_contract_explanations
 
 
 class GraphState(BaseModel):
@@ -17,12 +22,14 @@ class GraphState(BaseModel):
     reliability_result: Optional[AgentResult] = None
     security_result: Optional[AgentResult] = None
     report: Optional[AnalysisReport] = None
+    explain_attempts: int = 0
 
 
 parser_agent = ParserAgent()
 cost_agent = CostAgent()
 reliability_agent = ReliabilityAgent()
 security_agent = SecurityAgent()
+evaluator_agent = EvaluatorAgent()
 
 
 def node_parse(state: GraphState) -> Dict[str, Any]:
@@ -65,6 +72,62 @@ def node_aggregate(state: GraphState) -> Dict[str, Any]:
     return {"report": report}
 
 
+def _explanations_enabled(state: GraphState) -> bool:
+    return bool(state.input.options.get("enable_explanations")) if state.input else False
+
+
+def _evaluator_enabled(state: GraphState) -> bool:
+    return bool(state.input.options.get("enable_evaluator")) if state.input else False
+
+
+def node_explain(state: GraphState) -> Dict[str, Any]:
+    report = state.report
+    if report is None:
+        return {}
+    if not _explanations_enabled(state):
+        return {}
+    attach_contract_explanations(
+        report.issues,
+        llm_available=bool(state.input.options.get("enable_explanation_llm")),
+    )
+    report.raw["explanations_enabled"] = True
+    return {"report": report, "explain_attempts": state.explain_attempts + 1}
+
+
+def node_evaluate(state: GraphState) -> Dict[str, Any]:
+    report = state.report
+    if report is None:
+        return {}
+    if not _evaluator_enabled(state):
+        return {}
+
+    evaluation = evaluator_agent.run(
+        report,
+        use_llm=bool(state.input.options.get("enable_evaluator_llm")),
+    )
+    report.evaluation_notes = evaluation.notes
+    report.raw["evaluation_retries"] = evaluation.retries
+
+    if (
+        state.input.options.get("enable_reflection")
+        and evaluation.notes
+        and state.explain_attempts < 1
+    ):
+        attach_contract_explanations(
+            report.issues,
+            llm_available=bool(state.input.options.get("enable_explanation_llm")),
+        )
+        evaluation = evaluator_agent.run(
+            report,
+            use_llm=bool(state.input.options.get("enable_evaluator_llm")),
+        )
+        report.evaluation_notes = evaluation.notes
+        report.raw["evaluation_retries"] = evaluation.retries + 1
+        return {"report": report, "explain_attempts": state.explain_attempts + 1}
+
+    return {"report": report}
+
+
 def _should_short_circuit(state: GraphState) -> str:
     if not state.parser_output:
         return "continue"
@@ -80,6 +143,8 @@ def build_graph() -> StateGraph:
     graph.add_node("reliability", node_reliability)
     graph.add_node("security", node_security)
     graph.add_node("aggregate", node_aggregate)
+    graph.add_node("explain", node_explain)
+    graph.add_node("evaluate", node_evaluate)
 
     graph.set_entry_point("parse")
     graph.add_conditional_edges(
@@ -93,7 +158,9 @@ def build_graph() -> StateGraph:
     graph.add_edge("cost", "reliability")
     graph.add_edge("reliability", "security")
     graph.add_edge("security", "aggregate")
-    graph.add_edge("aggregate", END)
+    graph.add_edge("aggregate", "explain")
+    graph.add_edge("explain", "evaluate")
+    graph.add_edge("evaluate", END)
 
     return graph
 

@@ -3,12 +3,15 @@
 from .contracts import (
     Severity,
     Issue,
+    ExplanationDoc,
+    IssueExplanation,
     ParseError,
     CanonicalConfig,
     CanonicalProvisioner,
     CanonicalEC2NodeClass,
     AnalysisInput,
     AgentResult,
+    EvaluationResult,
     AnalysisReport,
     ParserOutput,
 )
@@ -16,12 +19,15 @@ from .contracts import (
 __all__ = [
     "Severity",
     "Issue",
+    "ExplanationDoc",
+    "IssueExplanation",
     "ParseError",
     "CanonicalConfig",
     "CanonicalProvisioner",
     "CanonicalEC2NodeClass",
     "AnalysisInput",
     "AgentResult",
+    "EvaluationResult",
     "AnalysisReport",
     "ParserOutput",
 ]
