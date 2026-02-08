@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from karpenter_ai_agent.models import AgentResult, CanonicalConfig, Issue
+from karpenter_ai_agent.models import AgentResult, CanonicalConfig, CanonicalEC2NodeClass, Issue
 from karpenter_ai_agent.agents._adapters import to_legacy_nodeclass, issue_from_legacy
 from rules import _check_nodeclass_instance_profile
 
@@ -19,6 +19,10 @@ def _extract_ami_selector_terms(raw_yaml: dict) -> list[dict]:
     if isinstance(terms, list):
         return [term for term in terms if isinstance(term, dict)]
     return []
+
+
+def _nodeclass_index(config: CanonicalConfig) -> dict[str, CanonicalEC2NodeClass]:
+    return {nodeclass.name: nodeclass for nodeclass in config.ec2_nodeclasses}
 
 
 def _is_overly_broad_ami_term(term: dict) -> bool:
@@ -44,6 +48,68 @@ class SecurityAgent:
         legacy_nodeclasses = [to_legacy_nodeclass(nc) for nc in config.ec2_nodeclasses]
 
         issues: List[Issue] = []
+        nodeclass_by_name = _nodeclass_index(config)
+
+        for prov in config.provisioners:
+            if prov.kind != "NodePool":
+                continue
+            nodeclass_ref = _normalized_str(prov.nodeclass_name)
+            if not nodeclass_ref:
+                issues.append(
+                    Issue(
+                        rule_id="security:missing-nodeclass-ref",
+                        severity="medium",
+                        category="NodePool <-> EC2NodeClass",
+                        message=(
+                            f"NodePool '{prov.name}' does not specify a nodeClassRef."
+                        ),
+                        recommendation=(
+                            "Set nodeClassRef.name to a valid EC2NodeClass so nodes "
+                            "launch with the expected infrastructure settings."
+                        ),
+                        patch_snippet=(
+                            f"# Example nodeClassRef for NodePool '{prov.name}'\n"
+                            "spec:\n"
+                            "  template:\n"
+                            "    spec:\n"
+                            "      nodeClassRef:\n"
+                            "        name: REPLACE_WITH_VALID_NODECLASS\n"
+                        ),
+                        resource_name=prov.name,
+                        resource_kind="NodePool",
+                        metadata={"field": "spec.template.spec.nodeClassRef.name"},
+                    )
+                )
+                continue
+
+            if nodeclass_ref not in nodeclass_by_name:
+                issues.append(
+                    Issue(
+                        rule_id="security:missing-nodeclass",
+                        severity="high",
+                        category="NodePool <-> EC2NodeClass",
+                        message=(
+                            f"NodePool '{prov.name}' references missing EC2NodeClass "
+                            f"'{nodeclass_ref}'."
+                        ),
+                        recommendation=(
+                            "Create the referenced EC2NodeClass or update the NodePool "
+                            "to point at a valid EC2NodeClass."
+                        ),
+                        patch_snippet=(
+                            f"# Update nodeClassRef for NodePool '{prov.name}'\n"
+                            "spec:\n"
+                            "  template:\n"
+                            "    spec:\n"
+                            "      nodeClassRef:\n"
+                            "        name: REPLACE_WITH_VALID_NODECLASS\n"
+                        ),
+                        resource_name=prov.name,
+                        resource_kind="NodePool",
+                        metadata={"field": "spec.template.spec.nodeClassRef.name"},
+                    )
+                )
+
         for nc in legacy_nodeclasses:
             issues.extend(
                 issue_from_legacy(issue, "security")

@@ -22,6 +22,7 @@
 - Agent unit tests + orchestration flow tests
 - EC2NodeClass checks: AMI selectors, subnet/security group selectors, IAM role/instanceProfile validation
 - Patch suggestions for EC2NodeClass findings
+- Cross-validate NodePool ↔ EC2NodeClass references
 
 ---
 
@@ -29,7 +30,7 @@
 
 ### Step 1 — Expand EC2NodeClass rule coverage
 
-- Cross-validate NodePool ↔ EC2NodeClass references
+- All items complete.
 
 ---
 
