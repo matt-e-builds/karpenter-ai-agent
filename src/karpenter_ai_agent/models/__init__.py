@@ -15,6 +15,7 @@ from .contracts import (
     AnalysisReport,
     ParserOutput,
 )
+from .patches import PatchSuggestion, PatchCategory
 
 __all__ = [
     "Severity",
@@ -30,4 +31,6 @@ __all__ = [
     "EvaluationResult",
     "AnalysisReport",
     "ParserOutput",
+    "PatchSuggestion",
+    "PatchCategory",
 ]

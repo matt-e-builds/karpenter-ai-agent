@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict, List
 
 from karpenter_ai_agent.models import AnalysisInput, ParserOutput, AgentResult, AnalysisReport, Issue
+from karpenter_ai_agent.models.patches import build_patch_suggestions
 from rules import generate_summary
 from models import ProvisionerConfig, EC2NodeClassConfig, Issue as LegacyIssue
 
@@ -28,6 +29,8 @@ def aggregate_results(
         if result:
             issues.extend(result.issues)
 
+    patch_suggestions = build_patch_suggestions(issues)
+
     if parser_output is None or parser_output.config is None:
         return AnalysisReport(
             region=analysis_input.region,
@@ -36,6 +39,7 @@ def aggregate_results(
             issues_by_severity=_issues_by_severity(issues),
             optimizer_flags={},
             parse_errors=(parser_output.parse_errors if parser_output else []),
+            patch_suggestions=patch_suggestions,
         )
 
     provisioners = [ProvisionerConfig(**p.model_dump()) for p in parser_output.config.provisioners]
@@ -55,6 +59,12 @@ def aggregate_results(
 
     summary = generate_summary(provisioners, legacy_issues, nodeclasses)
 
+    nodepool_refs = {
+        prov.name: prov.nodeclass_name
+        for prov in parser_output.config.provisioners
+        if prov.kind == "NodePool"
+    }
+
     return AnalysisReport(
         region=analysis_input.region,
         health_score=summary["health_score"],
@@ -62,4 +72,9 @@ def aggregate_results(
         issues_by_severity=summary["issues_by_severity"],
         optimizer_flags=summary["optimization_status"],
         parse_errors=parser_output.parse_errors,
+        patch_suggestions=patch_suggestions,
+        raw={
+            "nodepool_refs": nodepool_refs,
+            "nodeclass_names": [nc.name for nc in parser_output.config.ec2_nodeclasses],
+        },
     )

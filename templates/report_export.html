@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karpenter Analysis Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #111; margin: 24px; }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+    .summary { margin: 1rem 0; }
+    .summary span { display: inline-block; margin-right: 1rem; }
+    .issue { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #ddd; }
+    .severity { font-weight: bold; }
+    .patch { background: #f7f7f7; padding: 0.5rem; font-family: monospace; white-space: pre-wrap; }
+    .ai { background: #fafafa; padding: 0.75rem; border: 1px solid #eee; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Karpenter Analysis Report</h1>
+  <div class="summary">
+    <span>Region: {{ region or "n/a" }}</span>
+    <span>Health Score: {{ summary.health_score }}/{{ summary.health_score_max }}</span>
+    <span>High: {{ summary.issues_by_severity.high }}</span>
+    <span>Medium: {{ summary.issues_by_severity.medium }}</span>
+    <span>Low: {{ summary.issues_by_severity.low }}</span>
+  </div>
+
+  <h2>Detected Issues ({{ issues|length }})</h2>
+  {% if issues %}
+    {% for issue in issues %}
+    <div class="issue">
+      <div class="severity">{{ issue.severity|upper }} – {{ issue.category }}</div>
+      <div>{{ issue.message }}</div>
+      <div><em>{{ issue.recommendation }}</em></div>
+      {% if include_patches and issue.patch_snippet %}
+      <div class="patch">{{ issue.patch_snippet }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>No issues detected.</p>
+  {% endif %}
+
+  <h2>AI Analysis</h2>
+  {% if ai_analysis %}
+    <div class="ai">{{ ai_analysis }}</div>
+  {% else %}
+    <p>No AI analysis available.</p>
+  {% endif %}
+</body>
+</html>

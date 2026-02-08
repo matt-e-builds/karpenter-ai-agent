@@ -238,6 +238,8 @@ spec:
             message=message,
             recommendation=recommendation,
             patch_snippet=patch,
+            resource_kind="EC2NodeClass",
+            resource_name=nc.name,
         )
     ]
 

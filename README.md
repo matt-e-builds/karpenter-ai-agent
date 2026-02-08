@@ -11,6 +11,7 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 - **Robust YAML parsing** – Handles multi-document uploads, Provisioners, NodePools, and EC2NodeClasses with defensive parsing for edge cases.
 - **Deterministic rule engine** – Checks Spot adoption, consolidation configuration, Graviton coverage, `ttlSecondsAfterEmpty`, EC2NodeClass IAM/subnet/security-group settings, and NodePool ↔ EC2NodeClass cross-validation.
 - **Actionable issue output** – Severity-tagged findings with human-readable recommendations, health score summary, and ready-to-apply YAML patch snippets (copy-to-clipboard in the UI).
+- **Patch bundle + report exports** – Bundle fixes by NodePool with category filters and export shareable HTML reports.
 - **Optional AI summary** – Groq-backed natural-language synopsis of the deterministic findings; never used for core logic.
 - **Grounded explanations (RAG v1)** – Curated Karpenter docs excerpts are retrieved locally to back per-issue explanations and links. No scraping, no bulk doc copying.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
@@ -20,6 +21,7 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 ![Architecture](docs/architecture.svg)
 
 Deterministic LangGraph orchestration over typed Pydantic contracts; LLM usage is strictly explain-only.
+To regenerate the diagram, run `scripts/render_diagrams.sh`.
 ## Design Principles
 - Multi-agent design: ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent, and CoordinatorAgent.
 - Typed Pydantic contracts for all agent inputs/outputs and normalized config.

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from typing import List
+from typing import List, Optional, Set
 from io import StringIO
 import os
 import sys
@@ -18,18 +18,53 @@ from rules import generate_summary
 from llm_client import generate_report
 from karpenter_ai_agent.agents import CoordinatorAgent, ParserAgent
 from karpenter_ai_agent.agents._adapters import to_legacy_provisioner, to_legacy_nodeclass
-from karpenter_ai_agent.models import AnalysisInput
+from karpenter_ai_agent.models import AnalysisInput, AnalysisReport
 from karpenter_ai_agent.rag.explain import attach_issue_explanations
+from karpenter_ai_agent.remediation.bundler import (
+    build_bundle_yaml,
+    build_bundle_yaml_for_nodepool,
+    DEFAULT_CATEGORIES,
+)
+from karpenter_ai_agent.models.patches import PatchCategory
 
 app = FastAPI(title="Karpenter Optimization Agent")
 
 # Holds the issues from the last successful analysis so we can export patches
 LAST_ISSUES: List[Issue] = []
+LAST_REPORT: Optional[AnalysisReport] = None
 
 os.makedirs("templates", exist_ok=True)
 os.makedirs("static", exist_ok=True)
 
 templates = Jinja2Templates(directory="templates")
+
+
+def _parse_category_selection(request: Request) -> Set[PatchCategory]:
+    params = request.query_params
+    selected: Set[PatchCategory] = set()
+    has_any = "selected" in params
+    for category in ("spot", "consolidation", "ttl", "graviton", "nodeclass"):
+        if category in params:
+            has_any = True
+            value = params.get(category, "")
+            if value in ("1", "true", "yes", "on"):
+                selected.add(category)  # type: ignore[arg-type]
+    if not has_any:
+        return set(DEFAULT_CATEGORIES)
+    return selected
+
+
+def _sort_issues(issues: List[Issue]) -> List[Issue]:
+    severity_rank = {"high": 0, "medium": 1, "low": 2}
+    return sorted(
+        issues,
+        key=lambda issue: (
+            severity_rank.get(issue.severity, 9),
+            issue.category or "",
+            issue.provisioner_name or "",
+            issue.message or "",
+        ),
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -123,6 +158,8 @@ async def analyze(
     # Store for download endpoint
     global LAST_ISSUES
     LAST_ISSUES = issues
+    global LAST_REPORT
+    LAST_REPORT = report
 
     summary = {
         "issues_by_severity": report.issues_by_severity,
@@ -134,6 +171,7 @@ async def analyze(
 
     # AI analysis via Groq
     ai_analysis = generate_report(region, summary, issues)
+    report.ai_summary = ai_analysis
 
     return templates.TemplateResponse(
         "results.html",
@@ -183,6 +221,98 @@ async def download_patches():
             "Content-Disposition": 'attachment; filename="karpenter-patches.yaml"'
         },
     )
+
+
+@app.get("/download/patch-bundle.yaml")
+async def download_patch_bundle(request: Request):
+    if not LAST_REPORT:
+        return HTMLResponse(
+            "No analysis has been run yet, or there are no issues to export.",
+            status_code=400,
+        )
+
+    include_categories = _parse_category_selection(request)
+    yaml_output = build_bundle_yaml(LAST_REPORT, include_categories)
+    if not yaml_output:
+        return HTMLResponse(
+            "No patch snippets match the selected categories.",
+            status_code=400,
+        )
+
+    buffer = StringIO()
+    buffer.write(yaml_output)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/x-yaml",
+        headers={
+            "Content-Disposition": 'attachment; filename="karpenter-fixes.yaml"'
+        },
+    )
+
+
+@app.get("/download/patch-bundle/{nodepool}.yaml")
+async def download_patch_bundle_nodepool(nodepool: str, request: Request):
+    if not LAST_REPORT:
+        return HTMLResponse(
+            "No analysis has been run yet, or there are no issues to export.",
+            status_code=400,
+        )
+
+    include_categories = _parse_category_selection(request)
+    yaml_output = build_bundle_yaml_for_nodepool(LAST_REPORT, nodepool, include_categories)
+    if not yaml_output:
+        return HTMLResponse(
+            "No patch snippets match the selected categories or nodepool.",
+            status_code=400,
+        )
+
+    buffer = StringIO()
+    buffer.write(yaml_output)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/x-yaml",
+        headers={
+            "Content-Disposition": f'attachment; filename="karpenter-fixes-{nodepool}.yaml"'
+        },
+    )
+
+
+@app.get("/download/report.html")
+async def download_report_html(request: Request):
+    if not LAST_REPORT:
+        return HTMLResponse(
+            "No analysis has been run yet, or there are no issues to export.",
+            status_code=400,
+        )
+
+    include_patches = request.query_params.get("include_patches", "1") in ("1", "true", "yes")
+    issues_sorted = _sort_issues(LAST_ISSUES)
+
+    html = templates.get_template("report_export.html").render(
+        {
+            "region": LAST_REPORT.region,
+            "issues": issues_sorted,
+            "summary": {
+                "issues_by_severity": LAST_REPORT.issues_by_severity,
+                "optimization_status": LAST_REPORT.optimizer_flags,
+                "health_score": LAST_REPORT.health_score,
+                "health_score_max": 100,
+            },
+            "ai_analysis": LAST_REPORT.ai_summary or "",
+            "include_patches": include_patches,
+        }
+    )
+
+    return HTMLResponse(
+        html,
+        headers={"Content-Disposition": 'attachment; filename="karpenter-report.html"'},
+    )
+
+
 
 
 if __name__ == "__main__":

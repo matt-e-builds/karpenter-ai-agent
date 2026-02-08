@@ -23,6 +23,9 @@
 - EC2NodeClass checks: AMI selectors, subnet/security group selectors, IAM role/instanceProfile validation
 - Patch suggestions for EC2NodeClass findings
 - Cross-validate NodePool ↔ EC2NodeClass references
+- Patch bundle generation grouped by NodePool
+- Category-based patch filters (Spot, consolidation, TTL, Graviton)
+- HTML report export
 
 ---
 
@@ -36,9 +39,7 @@
 
 ### Step 2 — Patch bundling and export
 
-- Generate combined patch bundles grouped by NodePool
-- Allow include/exclude of Spot, consolidation, TTL, Graviton fixes
-- Export HTML and PDF reports for sharing
+- All items complete.
 
 ---
 
