@@ -13,7 +13,7 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 - **Actionable issue output** – Severity-tagged findings with human-readable recommendations, health score summary, and ready-to-apply YAML patch snippets (copy-to-clipboard in the UI).
 - **Patch bundle + report exports** – Bundle fixes by NodePool with category filters and export shareable HTML reports.
 - **Optional AI summary** – Groq-backed natural-language synopsis of the deterministic findings; never used for core logic.
-- **Grounded explanations (RAG v1)** – Curated Karpenter docs excerpts are retrieved locally to back per-issue explanations and links. No scraping, no bulk doc copying.
+- **Grounded explanations (RAG)** – Curated Karpenter docs excerpts are retrieved locally to back per-issue explanations and links. No scraping, no bulk doc copying.
 - **Modern web UI** – FastAPI + Jinja templates with dark theme, structured cards, and health score visualization.
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
 
@@ -59,11 +59,6 @@ Optional: enable AI summaries by providing a Groq key.
 export GROQ_API_KEY="your_groq_api_key_here"
 ```
 If the variable is unset, the application still runs; AI summaries are simply disabled.
-
-## Optional RAG-based explanations
-The UI can show explanation-only context grounded in a local, curated docs corpus.
-This retrieval layer never changes findings or severities; it only adds links and
-short narrative context when enabled.
 
 ## Running the App
 ```bash
