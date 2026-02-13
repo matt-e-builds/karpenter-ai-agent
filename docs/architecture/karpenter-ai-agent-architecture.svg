@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">Karpenter AI Agent Architecture</title>
+  <desc id="desc">Deterministic analysis core with optional explainability layer including retrieval and evaluator.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1f2937"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="optional" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0b1220"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,4 L0,8 z" fill="#93c5fd"/>
+    </marker>
+    <marker id="arrowMuted" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,4 L0,8 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .title { font: 700 32px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #e2e8f0; }
+      .subtitle { font: 500 16px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #cbd5e1; }
+      .boundary { fill: none; stroke: #334155; stroke-width: 2; rx: 20; }
+      .boundary-opt { fill: none; stroke: #3b82f6; stroke-width: 2; stroke-dasharray: 8 6; rx: 20; }
+      .boundary-title { font: 700 20px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #93c5fd; }
+      .node { fill: url(#card); stroke: #334155; stroke-width: 1.5; rx: 14; }
+      .node-opt { fill: url(#optional); stroke: #3b82f6; stroke-width: 1.5; stroke-dasharray: 7 5; rx: 14; }
+      .node-text { font: 600 16px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #e5e7eb; }
+      .node-sub { font: 500 13px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #94a3b8; }
+      .label { font: 500 13px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #bfdbfe; }
+      .muted-label { font: 500 12px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #94a3b8; }
+      .path { stroke: #93c5fd; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .path-opt { stroke: #3b82f6; stroke-width: 1.5; stroke-dasharray: 8 5; fill: none; marker-end: url(#arrow); }
+      .path-muted { stroke: #94a3b8; stroke-width: 1.8; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrowMuted); }
+      .contract-line { stroke: #22d3ee; stroke-width: 1.1; stroke-dasharray: 5 5; fill: none; }
+      .legend { font: 500 12px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #94a3b8; }
+      .badge { font: 700 12px 'Inter', 'Segoe UI', Arial, sans-serif; fill: #0b1220; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="980" fill="url(#bg)"/>
+
+  <text x="48" y="52" class="title">Karpenter AI Agent — Architecture</text>
+  <text x="48" y="78" class="subtitle">Deterministic findings pipeline with optional explainability layer</text>
+
+  <rect x="36" y="110" width="1010" height="760" class="boundary"/>
+  <text x="56" y="140" class="boundary-title">Deterministic Analysis Core (testable)</text>
+
+  <rect x="1070" y="110" width="494" height="760" class="boundary-opt"/>
+  <text x="1090" y="140" class="boundary-title">Explainability Layer (optional)</text>
+  <rect x="1386" y="122" width="150" height="24" rx="12" fill="#93c5fd" opacity="0.95"/>
+  <text x="1402" y="138" class="badge">Explainability-only</text>
+
+  <!-- Input + Coordinator -->
+  <rect x="72" y="176" width="220" height="86" class="node"/>
+  <text x="88" y="208" class="node-text">📄 YAML Upload</text>
+  <text x="88" y="230" class="node-sub">FastAPI UI + templates</text>
+
+  <rect x="330" y="176" width="220" height="86" class="node"/>
+  <text x="346" y="208" class="node-text">🤖 CoordinatorAgent</text>
+  <text x="346" y="230" class="node-sub">Entry point</text>
+
+  <rect x="590" y="176" width="300" height="86" class="node"/>
+  <text x="606" y="208" class="node-text">🕸 LangGraph Orchestration</text>
+  <text x="606" y="230" class="node-sub">Graph-based agent orchestration</text>
+
+  <!-- Parser -->
+  <rect x="120" y="318" width="240" height="92" class="node"/>
+  <text x="136" y="352" class="node-text">📘 ParserAgent</text>
+  <text x="136" y="374" class="node-sub">YAML validation + normalization</text>
+
+  <rect x="410" y="318" width="290" height="92" class="node"/>
+  <text x="426" y="352" class="node-text">🧾 CanonicalConfig</text>
+  <text x="426" y="374" class="node-sub">Pydantic contracts</text>
+
+  <!-- Analysis agents -->
+  <rect x="120" y="468" width="210" height="90" class="node"/>
+  <text x="136" y="502" class="node-text">💰 CostAgent</text>
+  <text x="136" y="524" class="node-sub">Spot / Graviton checks</text>
+
+  <rect x="356" y="468" width="230" height="90" class="node"/>
+  <text x="372" y="502" class="node-text">💓 ReliabilityAgent</text>
+  <text x="372" y="524" class="node-sub">Consolidation / TTL</text>
+
+  <rect x="612" y="468" width="238" height="90" class="node"/>
+  <text x="628" y="502" class="node-text">🛡 SecurityAgent</text>
+  <text x="628" y="524" class="node-sub">NodeClass + reference checks</text>
+
+  <!-- Aggregate + report -->
+  <rect x="220" y="628" width="310" height="94" class="node"/>
+  <text x="236" y="662" class="node-text">📦 Aggregator / Report Builder</text>
+  <text x="236" y="684" class="node-sub">Issues + Signals → summary</text>
+
+  <rect x="560" y="628" width="330" height="94" class="node"/>
+  <text x="576" y="662" class="node-text">📄 AnalysisReport</text>
+  <text x="576" y="684" class="node-sub">health score, severities, patches</text>
+
+  <rect x="220" y="772" width="300" height="74" class="node"/>
+  <text x="236" y="804" class="node-text">🖥 Results UI + Downloads</text>
+  <text x="236" y="824" class="node-sub">issues, bundles, HTML export</text>
+
+  <!-- MCP + contracts -->
+  <rect x="726" y="318" width="264" height="92" class="node"/>
+  <text x="742" y="352" class="node-text">🧰 Local MCP-style Tools</text>
+  <text x="742" y="374" class="node-sub">deterministic + read-only</text>
+
+  <rect x="726" y="772" width="264" height="74" class="node"/>
+  <text x="742" y="804" class="node-text">📐 Pydantic Data Contracts</text>
+  <text x="742" y="824" class="node-sub">typed IO between agents</text>
+
+  <!-- Explainability -->
+  <rect x="1104" y="180" width="218" height="86" class="node-opt"/>
+  <text x="1120" y="214" class="node-text">📚 Knowledge Pack</text>
+  <text x="1120" y="236" class="node-sub">Karpenter docs (curated)</text>
+
+  <rect x="1342" y="180" width="188" height="86" class="node-opt"/>
+  <text x="1358" y="214" class="node-text">🔎 Retriever (RAG)</text>
+  <text x="1358" y="236" class="node-sub">local retrieval</text>
+
+  <rect x="1128" y="332" width="402" height="92" class="node-opt"/>
+  <text x="1144" y="366" class="node-text">🧠 Optional LLM Explainer (Groq)</text>
+  <text x="1144" y="388" class="node-sub">explanation-only; never changes findings</text>
+
+  <rect x="1128" y="492" width="402" height="90" class="node-opt"/>
+  <text x="1144" y="526" class="node-text">✅ EvaluatorAgent</text>
+  <text x="1144" y="548" class="node-sub">grounding/format/consistency checks</text>
+
+  <rect x="1128" y="642" width="402" height="92" class="node-opt"/>
+  <text x="1144" y="676" class="node-text">📝 AI Summary</text>
+  <text x="1144" y="698" class="node-sub">attached to UI report output</text>
+
+  <!-- Paths deterministic -->
+  <path d="M292 219 L330 219" class="path"/>
+  <path d="M550 219 L590 219" class="path"/>
+  <path d="M740 262 L740 304 L240 304 L240 318" class="path"/>
+  <path d="M360 364 L410 364" class="path"/>
+
+  <path d="M520 410 L520 442 L225 442 L225 468" class="path"/>
+  <path d="M520 410 L520 442 L470 442 L470 468" class="path"/>
+  <path d="M520 410 L520 442 L731 442 L731 468" class="path"/>
+
+  <path d="M225 558 L225 596 L325 596 L325 628" class="path"/>
+  <path d="M470 558 L470 596 L375 596 L375 628" class="path"/>
+  <path d="M731 558 L731 596 L425 596 L425 628" class="path"/>
+
+  <path d="M530 675 L560 675" class="path"/>
+  <path d="M640 722 L640 746 L370 746 L370 772" class="path"/>
+
+  <!-- Parse-failure fallback -->
+  <path d="M240 410 C 240 520, 320 570, 350 628" class="path-muted"/>
+  <text x="122" y="614" class="muted-label">parse failure → empty findings + errors</text>
+
+  <!-- MCP + contracts context (read-only/shared foundation, not active flow) -->
+  <path d="M1016 318 L1016 846" class="contract-line"/>
+  <path d="M1016 364 L990 364" class="contract-line"/>
+  <path d="M1016 809 L990 809" class="contract-line"/>
+  <text x="1026" y="366" class="muted-label">Read-only tooling</text>
+  <text x="1026" y="811" class="muted-label">Shared contracts</text>
+
+  <!-- Explainability flows -->
+  <path d="M1322 223 L1342 223" class="path-opt"/>
+  <text x="1360" y="172" class="label">Grounding context</text>
+
+  <path d="M1436 266 L1436 332" class="path-opt"/>
+  <path d="M890 675 L1040 675 L1040 378 L1128 378" class="path-opt"/>
+  <text x="900" y="655" class="label">AnalysisReport</text>
+
+  <path d="M1329 424 L1329 492" class="path-opt"/>
+  <path d="M1329 582 L1329 642" class="path-opt"/>
+  <path d="M1329 734 L1329 812 L520 812" class="path-opt"/>
+  <text x="1206" y="792" class="label">AI Summary → UI</text>
+
+  <rect x="1040" y="876" width="512" height="76" rx="12" fill="#0b1220" stroke="#334155" stroke-width="1" opacity="0.95"/>
+  <rect x="1056" y="896" width="20" height="12" class="node"/>
+  <text x="1086" y="906" class="legend">Solid lines / solid boxes = Deterministic analysis path (no LLMs)</text>
+  <rect x="1056" y="922" width="20" height="12" class="node-opt"/>
+  <text x="1086" y="932" class="legend">Dashed lines / dashed boxes = Optional LLM-based explainability layer (read-only)</text>
+</svg>

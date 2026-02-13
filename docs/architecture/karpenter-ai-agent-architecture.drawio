@@ -1,0 +1,63 @@
+<mxfile host="app.diagrams.net" modified="2026-02-13T12:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="karpenter-arch" name="Architecture">
+    <mxGraphModel dx="1600" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="core" value="Deterministic Analysis Core (testable)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#334155;fillColor=none;fontColor=#93c5fd;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="100" width="1015" height="760" as="geometry"/>
+        </mxCell>
+        <mxCell id="exp" value="Explainability Layer (optional)" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#334155;fillColor=none;fontColor=#93c5fd;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="100" width="500" height="760" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="yaml" value="📄 YAML Upload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="70" y="180" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="coord" value="🤖 CoordinatorAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="330" y="180" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="graph" value="🕸 LangGraph Orchestration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="590" y="180" width="300" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="parser" value="📘 ParserAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="120" y="320" width="240" height="80" as="geometry"/></mxCell>
+        <mxCell id="config" value="🧾 CanonicalConfig (Pydantic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="410" y="320" width="290" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="cost" value="💰 CostAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="120" y="470" width="210" height="80" as="geometry"/></mxCell>
+        <mxCell id="rel" value="💓 ReliabilityAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="356" y="470" width="230" height="80" as="geometry"/></mxCell>
+        <mxCell id="sec" value="🛡 SecurityAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="612" y="470" width="238" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="agg" value="📦 Aggregator / Report Builder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="220" y="628" width="310" height="86" as="geometry"/></mxCell>
+        <mxCell id="report" value="📄 AnalysisReport" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="560" y="628" width="330" height="86" as="geometry"/></mxCell>
+        <mxCell id="ui" value="🖥 Results UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="220" y="772" width="300" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="mcp" value="🧰 Local MCP-style Tools (read-only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="726" y="320" width="264" height="86" as="geometry"/></mxCell>
+        <mxCell id="contracts" value="📐 Pydantic Contracts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f2937;strokeColor=#334155;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="726" y="772" width="264" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="docs" value="📚 Knowledge Pack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="1104" y="180" width="218" height="78" as="geometry"/></mxCell>
+        <mxCell id="retr" value="🔎 Retriever (RAG)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="1342" y="180" width="188" height="78" as="geometry"/></mxCell>
+        <mxCell id="llm" value="🧠 Optional LLM Explainer (Groq)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="1128" y="332" width="402" height="86" as="geometry"/></mxCell>
+        <mxCell id="eval" value="✅ EvaluatorAgent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="1128" y="492" width="402" height="82" as="geometry"/></mxCell>
+        <mxCell id="ais" value="📝 AI Summary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#e5e7eb;" vertex="1" parent="1"><mxGeometry x="1128" y="642" width="402" height="86" as="geometry"/></mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="yaml" target="coord" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="coord" target="graph" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="graph" target="parser" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="parser" target="config" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="config" target="cost" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="config" target="rel" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="config" target="sec" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="cost" target="agg" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="rel" target="agg" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="sec" target="agg" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="agg" target="report" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="report" target="ui" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="e13" edge="1" parent="1" source="docs" target="retr" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="retr" target="llm" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="report" target="llm" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="llm" target="eval" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="eval" target="ais" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="ais" target="ui" style="endArrow=block;strokeColor=#93c5fd;"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="sc" value="Parse failure → short-circuit → report" style="text;html=1;strokeColor=none;fillColor=none;fontColor=#94a3b8;" vertex="1" parent="1"><mxGeometry x="80" y="600" width="300" height="26" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -18,10 +18,11 @@ All rule logic is deterministic and testable; the analysis flow is parse → ana
 - **Test coverage + CI** – Pytest fixtures for rules/edge cases plus GitHub Actions that run pytest and pip-audit on every push and pull request.
 
 ## Architecture
-![Architecture](docs/architecture.svg)
+![Architecture](docs/architecture/karpenter-ai-agent-architecture.svg)
 
-Deterministic LangGraph orchestration over typed Pydantic contracts; LLM usage is strictly explain-only.
-To regenerate the diagram, run `scripts/render_diagrams.sh`.
+- Deterministic Analysis Core runs parse + multi-agent analysis + aggregation to produce authoritative findings in `AnalysisReport`.
+- Explainability Layer is optional and consumes report outputs only; it does not write back into finding generation or severity scoring.
+- RAG retrieval and EvaluatorAgent are explanation quality components (grounding/format checks), not decision-making components.
 ## Design Principles
 - Multi-agent design: ParserAgent, CostAgent, ReliabilityAgent, SecurityAgent, and CoordinatorAgent.
 - Typed Pydantic contracts for all agent inputs/outputs and normalized config.

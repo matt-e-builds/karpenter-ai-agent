@@ -26,6 +26,7 @@
 - Patch bundle generation grouped by NodePool
 - Category-based patch filters (Spot, consolidation, TTL, Graviton)
 - HTML report export
+- Optional explainability path with local RAG retrieval + EvaluatorAgent checks
 
 ---
 
