@@ -79,11 +79,6 @@ class AgentResult(BaseModel):
     signals: Dict[str, Any] = Field(default_factory=dict)
 
 
-class EvaluationResult(BaseModel):
-    notes: List[str] = Field(default_factory=list)
-    retries: int = 0
-
-
 class AnalysisReport(BaseModel):
     region: Optional[str] = None
     health_score: int
@@ -104,3 +99,4 @@ class ParserOutput(BaseModel):
 
 
 from karpenter_ai_agent.models.patches import PatchSuggestion  # noqa: E402
+from karpenter_ai_agent.models.evaluation import EvaluationResult  # noqa: E402
