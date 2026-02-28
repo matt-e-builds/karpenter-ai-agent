@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from karpenter_ai_agent.rag.retrieve import retrieve_for_issue
+from karpenter_ai_agent.rag.models import RAGQuery, RetrievedChunk
 from karpenter_ai_agent.rag.render import render_citations
+from karpenter_ai_agent.rag.tool import build_issue_query, retrieve_context
 from karpenter_ai_agent.models import Issue as ContractIssue, ExplanationDoc, IssueExplanation as ContractExplanation
 from models import Issue, IssueDoc, IssueExplanation
 from llm_client import generate_issue_explanation, is_llm_enabled
@@ -23,8 +24,20 @@ def attach_issue_explanations(
         llm_available = is_llm_enabled()
 
     for issue in issues:
-        retrieval = retrieve_for_issue(issue, top_k=top_k)
-        citations = render_citations(retrieval.chunks)
+        query = RAGQuery(query=build_issue_query(issue), top_k=top_k)
+        retrieval = retrieve_context(query)
+        chunks = [
+            RetrievedChunk(
+                chunk_id=f"ctx-{index}",
+                doc_id="karpenter-docs",
+                title=context.title,
+                source_url=context.source_url,
+                text=context.text,
+                score=context.score,
+            )
+            for index, context in enumerate(retrieval.contexts)
+        ]
+        citations = render_citations(chunks)
         if not citations:
             continue
         docs = [
@@ -37,7 +50,7 @@ def attach_issue_explanations(
         ]
 
         if llm_available:
-            explanation = generate_issue_explanation(issue, retrieval.chunks)
+            explanation = generate_issue_explanation(issue, chunks)
             if explanation is None:
                 explanation = IssueExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
         else:
@@ -57,8 +70,20 @@ def attach_contract_explanations(
         llm_available = is_llm_enabled()
 
     for issue in issues:
-        retrieval = retrieve_for_issue(issue, top_k=top_k)
-        citations = render_citations(retrieval.chunks)
+        query = RAGQuery(query=build_issue_query(issue), top_k=top_k)
+        retrieval = retrieve_context(query)
+        chunks = [
+            RetrievedChunk(
+                chunk_id=f"ctx-{index}",
+                doc_id="karpenter-docs",
+                title=context.title,
+                source_url=context.source_url,
+                text=context.text,
+                score=context.score,
+            )
+            for index, context in enumerate(retrieval.contexts)
+        ]
+        citations = render_citations(chunks)
         if not citations:
             continue
         docs = [
@@ -81,7 +106,7 @@ def attach_contract_explanations(
                 resource_name=issue.resource_name,
                 patch_snippet=issue.patch_snippet,
             )
-            legacy_explanation = generate_issue_explanation(legacy_issue, retrieval.chunks)
+            legacy_explanation = generate_issue_explanation(legacy_issue, chunks)
             if legacy_explanation is None:
                 explanation = ContractExplanation(why_matters=DEFAULT_NO_LLM_NOTE)
             else:

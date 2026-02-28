@@ -18,3 +18,19 @@ class RetrievedChunk(Chunk):
 
 class RetrievalResult(BaseModel):
     chunks: List[RetrievedChunk] = Field(default_factory=list)
+
+
+class RAGQuery(BaseModel):
+    query: str
+    top_k: int = Field(default=3, ge=1, le=10)
+
+
+class RetrievedContext(BaseModel):
+    title: str
+    source_url: str
+    text: str
+    score: float = Field(ge=0)
+
+
+class RAGResult(BaseModel):
+    contexts: List[RetrievedContext] = Field(default_factory=list)
