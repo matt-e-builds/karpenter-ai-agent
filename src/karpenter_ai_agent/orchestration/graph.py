@@ -13,6 +13,8 @@ from karpenter_ai_agent.agents.security_agent import SecurityAgent
 from karpenter_ai_agent.agents.evaluator_agent import EvaluatorAgent
 from karpenter_ai_agent.orchestration.aggregate import aggregate_results
 from karpenter_ai_agent.rag.explain import attach_contract_explanations
+from karpenter_ai_agent.rag.models import RAGQuery, RetrievedContext
+from karpenter_ai_agent.rag.tool import build_issue_query, retrieve_context
 
 
 class GraphState(BaseModel):
@@ -100,32 +102,59 @@ def node_evaluate(state: GraphState) -> Dict[str, Any]:
         return {}
     if not _evaluator_enabled(state):
         return {}
+    if not _explanations_enabled(state):
+        return {}
 
+    rag_context = _build_rag_context(report.issues)
     evaluation = evaluator_agent.run(
         report,
-        use_llm=bool(state.input.options.get("enable_evaluator_llm")),
+        rag_context=rag_context,
+        generated_explanation=report.ai_summary,
     )
     report.evaluation_notes = evaluation.notes
-    report.raw["evaluation_retries"] = evaluation.retries
+    report.raw["evaluation_passed"] = evaluation.passed
+    report.raw["evaluation_latency_ms"] = round(evaluation.latency_ms, 2)
+    report.raw["evaluation_retries"] = 0
 
-    if (
-        state.input.options.get("enable_reflection")
-        and evaluation.notes
-        and state.explain_attempts < 1
-    ):
-        attach_contract_explanations(
-            report.issues,
-            llm_available=bool(state.input.options.get("enable_explanation_llm")),
-        )
-        evaluation = evaluator_agent.run(
-            report,
-            use_llm=bool(state.input.options.get("enable_evaluator_llm")),
-        )
-        report.evaluation_notes = evaluation.notes
-        report.raw["evaluation_retries"] = evaluation.retries + 1
+    if evaluation.passed:
+        return {"report": report}
+
+    attach_contract_explanations(
+        report.issues,
+        llm_available=bool(state.input.options.get("enable_explanation_llm")),
+    )
+    retry_evaluation = evaluator_agent.run(
+        report,
+        rag_context=rag_context,
+        generated_explanation=report.ai_summary,
+    )
+    retry_evaluation.retries = 1
+    report.evaluation_notes = retry_evaluation.notes
+    report.raw["evaluation_passed"] = retry_evaluation.passed
+    report.raw["evaluation_latency_ms"] = round(retry_evaluation.latency_ms, 2)
+    report.raw["evaluation_retries"] = 1
+
+    if retry_evaluation.passed:
         return {"report": report, "explain_attempts": state.explain_attempts + 1}
 
+    for issue in report.issues:
+        issue.explanation = None
+    report.ai_summary = None
+    report.raw["explanations_enabled"] = False
+    report.raw["explanation_fail_closed"] = True
+
     return {"report": report}
+
+
+def _build_rag_context(issues: list) -> Dict[str, list[RetrievedContext]]:
+    context_by_rule: Dict[str, list[RetrievedContext]] = {}
+    for issue in issues:
+        query = build_issue_query(issue)
+        if not query:
+            continue
+        result = retrieve_context(RAGQuery(query=query, top_k=3))
+        context_by_rule[issue.rule_id] = result.contexts
+    return context_by_rule
 
 
 def _should_short_circuit(state: GraphState) -> str:
