@@ -14,7 +14,7 @@ from karpenter_ai_agent.mcp.schemas import (
     RetrieveKarpenterDocsOutput,
     RetrievedDocChunk,
 )
-from parser import parse_provisioner_yaml
+from karpenter_ai_agent.parser_compat import parse_provisioner_yaml
 from karpenter_ai_agent.rag.models import RAGQuery
 from karpenter_ai_agent.rag.tool import retrieve_context
 
