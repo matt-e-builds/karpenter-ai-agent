@@ -12,7 +12,7 @@ from karpenter_ai_agent.models import (
     CanonicalProvisioner,
     CanonicalEC2NodeClass,
 )
-from parser import parse_provisioner_yaml
+from karpenter_ai_agent.parser_compat import parse_provisioner_yaml
 
 
 class ParserAgent:

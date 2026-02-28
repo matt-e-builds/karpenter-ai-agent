@@ -14,8 +14,9 @@ from karpenter_ai_agent.mcp.schemas import (
     RetrieveKarpenterDocsOutput,
     RetrievedDocChunk,
 )
-from parser import parse_provisioner_yaml
-from karpenter_ai_agent.rag.retrieve import retrieve
+from karpenter_ai_agent.parser_compat import parse_provisioner_yaml
+from karpenter_ai_agent.rag.models import RAGQuery
+from karpenter_ai_agent.rag.tool import retrieve_context
 
 
 def validate_yaml_schema(
@@ -60,14 +61,14 @@ def retrieve_karpenter_docs(
     payload: RetrieveKarpenterDocsInput,
 ) -> RetrieveKarpenterDocsOutput:
     """Retrieve curated Karpenter doc snippets for a query."""
-    result = retrieve(payload.query, top_k=payload.top_k)
+    result = retrieve_context(RAGQuery(query=payload.query, top_k=payload.top_k))
     chunks = [
         RetrievedDocChunk(
-            title=chunk.title,
-            source_url=chunk.source_url,
-            text=chunk.text,
-            score=chunk.score,
+            title=context.title,
+            source_url=context.source_url,
+            text=context.text,
+            score=context.score,
         )
-        for chunk in result.chunks
+        for context in result.contexts
     ]
     return RetrieveKarpenterDocsOutput(chunks=chunks)

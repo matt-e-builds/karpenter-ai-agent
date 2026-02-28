@@ -11,10 +11,10 @@ from .contracts import (
     CanonicalEC2NodeClass,
     AnalysisInput,
     AgentResult,
-    EvaluationResult,
     AnalysisReport,
     ParserOutput,
 )
+from .evaluation import EvaluationResult, EvaluationReason
 from .patches import PatchSuggestion, PatchCategory
 
 __all__ = [
@@ -29,6 +29,7 @@ __all__ = [
     "AnalysisInput",
     "AgentResult",
     "EvaluationResult",
+    "EvaluationReason",
     "AnalysisReport",
     "ParserOutput",
     "PatchSuggestion",
