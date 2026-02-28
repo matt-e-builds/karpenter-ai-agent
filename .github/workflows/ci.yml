@@ -32,6 +32,30 @@ jobs:
       - name: Run pytest
         run: pytest
 
+      - name: Run evaluator guardrails
+        run: pytest -q tests/test_rag.py tests/test_evaluator.py tests/test_explanation_flow.py
+
+      - name: Log evaluation metrics sample
+        run: |
+          PYTHONPATH=.:src python - <<'PY'
+          from pathlib import Path
+          from karpenter_ai_agent.models import AnalysisInput
+          from karpenter_ai_agent.orchestration.graph import run_analysis_graph
+
+          fixture = Path("tests/fixtures/basic-karpenter.yaml").read_text()
+          report = run_analysis_graph(
+              AnalysisInput(
+                  yaml_text=fixture,
+                  region="us-east-1",
+                  options={"enable_explanations": True, "enable_evaluator": True},
+              )
+          )
+
+          print(f"evaluation_passed={report.raw.get('evaluation_passed')}")
+          print(f"evaluation_retries={report.raw.get('evaluation_retries')}")
+          print(f"evaluation_latency_ms={report.raw.get('evaluation_latency_ms')}")
+          PY
+
   security:
     runs-on: ubuntu-latest
     needs: tests
